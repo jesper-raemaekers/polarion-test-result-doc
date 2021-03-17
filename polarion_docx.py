@@ -16,7 +16,7 @@ def findWorkitemInDoc(doc):
             workitem = content.getContent()
             if workitem.hasField('id'):
                 id = workitem.getField('id').all_text
-                workitems_in_doc[id] = {}
+                workitems_in_doc[id] = None
     return workitems_in_doc
 
 def getTestRuns(polarion_config):
@@ -47,7 +47,7 @@ def matchResultsToDoc(workitems, test_runs):
             else:
                 print(f'{record.getTestCaseName()} was in test run {test_run} but not in the document')
     for workitem in workitems:
-        if workitems[workitem] == False:
+        if workitems[workitem] == None:
             print(f'{workitem} not found in test runs')
 
            
@@ -62,7 +62,7 @@ def fillDocWithResults(doc, workitems, config):
                 id = workitem.getField('id').all_text
 
                 result = workitems[id]
-                if result != False:
+                if result != None:
                     par_idx = 0
                     if config['result_position'] < len(workitem.p_lst):
                         par_idx = config['result_position']
