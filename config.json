@@ -1,0 +1,16 @@
+{
+    "input": "in.docx",
+    "output": "out.docx",
+    "polarion": {
+        "url": "http://example/polarion",
+        "username": "",
+        "password": "",
+        "project": "",
+        "test_runs": [
+            ""
+        ]
+    },
+    "result_position": 0,
+    "result_string": "Result: {result} (executed on {executed})",
+    "date_format": "%d-%m-%Y %H:%M"
+}
