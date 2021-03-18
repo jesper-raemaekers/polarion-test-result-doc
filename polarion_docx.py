@@ -74,7 +74,7 @@ def buildResultString(paragraph, result, config):
         result_string = result_string.replace('{result}', result.result.id)
         # result.executedByURI
         result_string = result_string.replace('{executed}', result.executed.strftime(config['date_format'])) 
-        result_string = result_string.replace('{user}', '-')
+        result_string = result_string.replace('{user}', result.getExecutingUser().name)
         if result.comment == None:
             result_string = result_string.replace('{comment}', '-')
         else:

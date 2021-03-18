@@ -11,7 +11,7 @@
         ]
     },
     "result_position": 0,
-    "result_string": "Result: {result}\nColored result: {result_color}\rExecuted on {executed}\nComment: {comment}",
+    "result_string": "Result: {result}\nColored result: {result_color}\nExecuted by: {user}\nExecuted on {executed}\nComment: {comment}",
     "result_name_color": {
         "passed": [
             155,
