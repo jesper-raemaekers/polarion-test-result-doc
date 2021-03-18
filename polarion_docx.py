@@ -46,9 +46,9 @@ def getTestRuns(polarion_config):
     return test_runs
 
 def matchResultsToDoc(workitems, test_runs):
-    print('Mathing test run results to document')
-    for test_run in progressbar.progressbar(test_runs, redirect_stdout=True):
-        for record in test_runs[test_run].records:
+    for test_run in test_runs:
+        print(f'Mathing test run "{test_run}" results to document')
+        for record in progressbar.progressbar(test_runs[test_run].records, redirect_stdout=True):
             if record.getTestCaseName() in workitems:
                 workitems[record.getTestCaseName()] = record
             else:
