@@ -11,6 +11,23 @@
         ]
     },
     "result_position": 0,
-    "result_string": "Result: {result} (executed on {executed})",
+    "result_string": "Result: {result}\nColored result: {result_color}\rExecuted on {executed}\nComment: {comment}",
+    "result_name_color": {
+        "passed": [
+            155,
+            187,
+            89
+        ],
+        "blocked": [
+            177,
+            108,
+            10
+        ],
+        "failed": [
+            255,
+            0,
+            0
+        ]
+    },
     "date_format": "%d-%m-%Y %H:%M"
 }

@@ -1,17 +1,22 @@
 from docx import Document
 from docx.text.paragraph import Paragraph
 from docx.text.run import Run
+from docx.shared import RGBColor
 from polarion.polarion import Polarion
 import oxml_helpers
 import argparse
 import json
+import re
+import progressbar
+
 
 def findWorkitemInDoc(doc):
     workitems_in_doc = {}
     doc_elm = doc._element
 
     content_list = doc_elm.xpath('.//w:sdt')
-    for content in content_list:
+    print('Finding workitems in document')
+    for content in progressbar.progressbar(content_list, redirect_stdout=True):
         if content.hasTag('workItem'):
             workitem = content.getContent()
             if workitem.hasField('id'):
@@ -30,8 +35,9 @@ def getTestRuns(polarion_config):
         project = pol.getProject(polarion_config['project'])
     except Exception as e:
         print(f"Opening the project {polarion_config[' project ']} failed with the following error: {e}")
-        
-    for run in polarion_config['test_runs']:
+
+    print(f'Loading test runs from Polarion')
+    for run in progressbar.progressbar(polarion_config['test_runs'], redirect_stdout=True):
         try:
             test_runs[run] = project.getTestRun(run)
         except Exception as e:
@@ -40,7 +46,8 @@ def getTestRuns(polarion_config):
     return test_runs
 
 def matchResultsToDoc(workitems, test_runs):
-    for test_run in test_runs:
+    print('Mathing test run results to document')
+    for test_run in progressbar.progressbar(test_runs, redirect_stdout=True):
         for record in test_runs[test_run].records:
             if record.getTestCaseName() in workitems:
                 workitems[record.getTestCaseName()] = record
@@ -50,12 +57,57 @@ def matchResultsToDoc(workitems, test_runs):
         if workitems[workitem] == None:
             print(f'{workitem} not found in test runs')
 
-           
+def cleanhtml(raw_html):
+    cleanr = re.compile('<.*?>')
+    cleantext = re.sub(cleanr, '', raw_html)
+    return cleantext
+
+def buildResultString(paragraph, result, config):
+    result_string = config['result_string']
+    if result.executed == None:
+        result_string = result_string.replace('{result}', '-')
+        result_string = result_string.replace('{result_color}', '-')
+        result_string = result_string.replace('{executed}', '-')
+        result_string = result_string.replace('{user}', '-')
+        result_string = result_string.replace('{comment}', '-')
+    else:
+        result_string = result_string.replace('{result}', result.result.id)
+        # result.executedByURI
+        result_string = result_string.replace('{executed}', result.executed.strftime(config['date_format'])) 
+        result_string = result_string.replace('{user}', '-')
+        if result.comment == None:
+            result_string = result_string.replace('{comment}', '-')
+        else:
+            # result.comment.content can contain HTML, make sure to clean it before putting in doc
+            comment = cleanhtml(result.comment.content)
+            result_string = result_string.replace('{comment}', comment)
+
+    if '{result_color}' in result_string:
+        result_color = result.result.id.upper()
+
+        parts = result_string.split('{result_color}')
+        paragraph.add_run(parts[0])
+        result_run = paragraph.add_run(result_color)
+        paragraph.add_run(parts[1])
+
+        if 'result_name_color' in config:
+            if result.result.id in config['result_name_color']:
+                config_color = config['result_name_color'][result.result.id]
+                result_run.font.color.rgb = RGBColor(config_color[0], config_color[1], config_color[2])
+        result_run.font.bold = True
+        pass
+    else:
+
+        paragraph.add_run(f'\n{result_string}')
+            
+
+
 def fillDocWithResults(doc, workitems, config):
     doc_elm = doc._element
 
     content_list = doc_elm.xpath('.//w:sdt')
-    for content in content_list:
+    print('Filling out result in document')
+    for content in progressbar.progressbar(content_list, redirect_stdout=True):
         if content.hasTag('workItem'):
             workitem = content.getContent()
             if workitem.hasField('id'):
@@ -71,18 +123,14 @@ def fillDocWithResults(doc, workitems, config):
 
                     par = Paragraph(workitem.p_lst[par_idx], document._body)
 
-                    result_string = config['result_string']
+                    buildResultString(par, result, config)
                     
-                    if result.executed == None:
-                        result_string = result_string.replace('{result}', 'No')
-                        result_string = result_string.replace('{executed}', 'No date')
-                    else:
-                        result_string = result_string.replace('{result}', result.result.id)
-                        result_string = result_string.replace('{executed}', result.executed.strftime(config['date_format']))                        
+                                           
 
 
-                    par.add_run(f'\n{result_string}')
+                    
 
+progressbar.streams.wrap_stderr()
 
 parser = argparse.ArgumentParser(description='Add test result to polarion exported document')
 parser.add_argument('-c', '--config', type=str, default='config.json', help='json configuration file')
