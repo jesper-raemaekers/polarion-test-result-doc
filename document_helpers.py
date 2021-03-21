@@ -3,6 +3,7 @@ from docx.shared import RGBColor
 import progressbar
 import logging
 import copy
+import re
 
 def findWorkitemInDoc(doc):
     workitems_in_doc = {}
@@ -113,8 +114,38 @@ def cleanhtml(raw_html):
     cleantext = re.sub(cleanr, '', raw_html)
     return cleantext
 
+def getResultColor(result, config):
+    if 'result_name_color' in config:
+        if result in config['result_name_color']:
+            config_color = config['result_name_color'][result]
+            return RGBColor(config_color[0], config_color[1], config_color[2])
+    return RGBColor(0, 0, 0)
+
 def makeTestStepResult(step_id, paragraph, workitem_id, workitem_list, config):
-    paragraph.add_run(f'This result will be in the table at step {step_id}')
+    w = workitem_list[workitem_id]
+
+    result = None
+    comment = None
+    attachments = None
+
+    if w.testStepResults != None:
+        if len(w.testStepResults.TestStepResult) >= step_id:
+            if w.testStepResults.TestStepResult[step_id - 1].result != None:
+                result = w.testStepResults.TestStepResult[step_id - 1].result.id
+            if w.testStepResults.TestStepResult[step_id - 1].comment != None:
+                comment = w.testStepResults.TestStepResult[step_id - 1].comment.content
+            if w.testStepResults.TestStepResult[step_id - 1].attachments != None:
+                attachments = True
+
+    if result != None:
+        run = paragraph.add_run(f'{result.upper()}\n')        
+        run.font.color.rgb = getResultColor(result, config)
+        run.font.bold = True
+    if comment != None:
+        paragraph.add_run(f'{cleanhtml(comment)}\n')
+    if attachments != None:
+        paragraph.add_run(f'Has attachments')
+
 
 def makeTestCaseResult(paragraph, workitem_id, workitem_list, config):
     result = workitem_list[workitem_id]
@@ -145,10 +176,7 @@ def makeTestCaseResult(paragraph, workitem_id, workitem_list, config):
         result_run = paragraph.add_run(result_color)
         paragraph.add_run(parts[1])
 
-        if 'result_name_color' in config:
-            if result.result.id in config['result_name_color']:
-                config_color = config['result_name_color'][result.result.id]
-                result_run.font.color.rgb = RGBColor(config_color[0], config_color[1], config_color[2])
+        result_run.font.color.rgb = getResultColor(result.result.id, config)
         result_run.font.bold = True
         pass
     else:

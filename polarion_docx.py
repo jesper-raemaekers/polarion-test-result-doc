@@ -7,7 +7,7 @@ from polarion.polarion import Polarion
 import oxml_helpers
 import argparse
 import json
-import re
+
 import logging
 import progressbar
 import copy
