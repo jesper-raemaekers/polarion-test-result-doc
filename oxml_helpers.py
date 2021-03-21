@@ -63,6 +63,7 @@ class CT_BlockContent(BaseOxmlElement):
     p = ZeroOrMore('w:p')
     sdt = ZeroOrMore('w:sdt')
     r = ZeroOrMore('w:r')
+    tbl = ZeroOrMore('w:tbl')
 
     def hasTag(self, tag):
         for s in self.sdt_lst:

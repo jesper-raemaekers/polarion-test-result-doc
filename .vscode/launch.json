@@ -5,12 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Polarion DOCX parser",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "polarion_docx.py",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "args": [
+                "-c",
+                "config_local.json"
+            ]
         }
     ]
 }
