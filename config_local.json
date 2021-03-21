@@ -1,0 +1,33 @@
+{
+    "input": "System Test Case Specification.docx",
+    "output": "out.docx",
+    "polarion": {
+        "url": "http://192.168.107.92/polarion/",
+        "username": "admin",
+        "password": "admin",
+        "project": "new_test",
+        "test_runs": [
+            "test-0001"
+        ]
+    },
+    "result_position": 0,
+    "result_string": "\nResult: {result}\nColored result: {result_color}\nExecuted by: {user}\nExecuted on {executed}\nComment: {comment}",
+    "result_name_color": {
+        "passed": [
+            155,
+            187,
+            89
+        ],
+        "blocked": [
+            177,
+            108,
+            10
+        ],
+        "failed": [
+            255,
+            0,
+            0
+        ]
+    },
+    "date_format": "%d-%m-%Y %H:%M"
+}
